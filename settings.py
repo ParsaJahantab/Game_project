@@ -38,6 +38,7 @@ WIN_SOUND = "assets/sounds/maze/win.wav"
 SOULVE_PUZZLE_SOUND = "assets/sounds/maze/solving_puzzle.wav"
 FAIL_PUZZLE_SOUND = "assets/sounds/maze/failing_puzzle.wav"
 ERROR_SOUND = "assets/sounds/maze/error.mp3"
+COIN_SOUND = "assets/sounds/maze/coin_sound.mp3"
 
 MAZE_MUSIC = "assets/music/background_music.mp3"
 
@@ -54,8 +55,16 @@ VOLUME_ICON = "assets/images/icons/volume.png"
 LOGO = "assets/images/logo/logo.png"
 
 PORTAL = "assets/images/items/portal.png"
+COIN = "assets/images/items/coin.png"
+SHOPKEEPER = "assets/images/shopkeeper/shopkeeper.png"
 
 GRASS_TILE = "assets/images/ground/grass.png"
 DIRT_TILE = "assets/images/ground/dirt.png"
 ROCK_TILE = "assets/images/ground/rock.png"
 
+
+SHIP_TILE = "assets/images/battleship/ship.png"
+SEA_TILE = "assets/images/battleship/sea.png"
+HIT_TILE = "assets/images/battleship/hit.png"
+MISS_TILE = "assets/images/battleship/miss.png"
+MINE_TILE = "assets/images/battleship/mine.png"
