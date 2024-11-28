@@ -11,6 +11,10 @@ from ui.button import *
 import random
 import importlib
 import ast
+from ui.utils.utils_functions import *
+from ui.side_ui import *
+from sprites.coin import *
+from sprites.shopkeeper import *
 
 
 class Game:
@@ -27,79 +31,16 @@ class Game:
         self.solve_puzzle_sound = pg.mixer.Sound(SOULVE_PUZZLE_SOUND)
         self.fail_puzzle_sound = pg.mixer.Sound(FAIL_PUZZLE_SOUND)
         self.error_sound = pg.mixer.Sound(ERROR_SOUND)
+        self.coin_sound = pg.mixer.Sound(COIN_SOUND)
         pg.mixer.music.load(MAZE_MUSIC)
         pg.mixer.music.set_volume(0.5)
         pg.mixer.music.play(-1)
-        self.exit_button = ImageButton(
-            (TILESIZE * 9) + 15,
-            TILESIZE * 8,
-            RED_BUTTON,
-            "Exit Game",
-            VOLKSWAGEN_BOLD_FONT_PATH,
-            16,
-            text_color=(0, 0, 0),
-            hover_text_color=(255, 255, 255),
-        )
-        self.reset_button = ImageButton(
-            (TILESIZE * 9) + 15,
-            TILESIZE * 7,
-            BLUE_BUTTON,
-            "Reset Game",
-            VOLKSWAGEN_BOLD_FONT_PATH,
-            16,
-            text_color=(0, 0, 0),
-            hover_text_color=(255, 255, 255),
-        )
-        self.volume_button = ImageButton(
-            (TILESIZE * 9) + 15,
-            TILESIZE * 6,
-            GREEN_BUTTON,
-            "",
-            VOLKSWAGEN_BOLD_FONT_PATH,
-            16,
-            text_color=(0, 0, 0),
-            hover_text_color=(255, 255, 255),
-            icon_path=VOLUME_ICON,
-            secondary_image_path=GRAY_BUTTON,
-            secondary_icon_path=MUTE_ICON,
-            scale=(80, 48),
-        )
-        self.music_button = ImageButton(
-            (TILESIZE * 9) + 120,
-            TILESIZE * 6,
-            GREEN_BUTTON,
-            "",
-            VOLKSWAGEN_BOLD_FONT_PATH,
-            16,
-            text_color=(0, 0, 0),
-            hover_text_color=(255, 255, 255),
-            icon_path=MUSIC_ICON,
-            secondary_image_path=GRAY_BUTTON,
-            secondary_icon_path=SLASH_ICON,
-            scale=(80, 48),
-        )
-        self.end_exit_button = ImageButton(
-            (TILESIZE * 4) - 10,
-            TILESIZE * 8,
-            RED_BUTTON,
-            "Exit Game",
-            VOLKSWAGEN_BOLD_FONT_PATH,
-            16,
-            text_color=(0, 0, 0),
-            hover_text_color=(255, 255, 255),
-            scale=(300, 60),
-        )
-        self.end_reset_button = ImageButton(
-            (TILESIZE * 4) - 10,
-            TILESIZE * 7,
-            BLUE_BUTTON,
-            "Reset Game",
-            VOLKSWAGEN_BOLD_FONT_PATH,
-            16,
-            text_color=(0, 0, 0),
-            hover_text_color=(255, 255, 255),
-            scale=(300, 60),
-        )
+        self.exit_button = get_exit_button()
+        self.reset_button = get_reset_button()
+        self.volume_button = get_volume_button()
+        self.music_button = get_music_button()
+        self.end_exit_button = get_exit_button(type="end")
+        self.end_reset_button = get_reset_button(type="end")
         self.logo_image = self.add_logo((300, 200))
         self.end_logo_image = self.add_logo((600, 400))
         self.score = 2000
@@ -108,20 +49,25 @@ class Game:
         self.is_mute = False
         self.is_music_mute = False
         self.bonus_score = 0
+        self.coins = 0
+        self.has_torch = False
+        self.has_key = False
         self.loaded_functions = self.load_functions_from_module(
             "puzzles_functions", self.get_top_level_functions("puzzles_functions.py")
         )
         self.is_pause = False
 
-    def draw_text(self, text, pos, font, color=WHITE):
-        surf = font.render(text, True, color)
-        rect = surf.get_rect(topright=(pos[0], pos[1]))
-        self.screen.blit(surf, rect)
 
     def load_functions_from_module(self, module_name, function_names):
-
         module = importlib.import_module(module_name)
-        return [getattr(module, func) for func in function_names]
+
+        def wrap_function(func):
+            if func.__name__ == "battleship":
+                return lambda *args, **kwargs: func(self, *args, **kwargs)
+            return func
+
+        return [wrap_function(getattr(module, func)) for func in function_names]
+
 
     def get_top_level_functions(self, file_path):
 
@@ -159,6 +105,18 @@ class Game:
         self.handel_score(2000 + bonus)
         self.play_sound("win")
         self.playing = False
+        
+    def add_coin(self,sprite):
+        self.coins +=1
+        self.play_sound("coin")
+        sprite.kill()
+    
+    def check_coin(self):
+        if self.coins ==3 :
+            self.has_torch = True
+            self.coins = 0
+            print(self.has_torch)
+        
 
     def new(self):
         self.all_sprites = pg.sprite.Group()
@@ -169,11 +127,15 @@ class Game:
         self.teleporter = pg.sprite.Group()
         self.fog_sprite = pg.sprite.Group()
         self.player_sprite = pg.sprite.Group()
+        self.coin_sprite = pg.sprite.Group()
+        self.shopkeeper = pg.sprite.Group()
         self.score = 2000
         self.bonus_score = 0
         self.solved_puzzles = 0
         self.playing = True
         self.is_pause = False
+        self.has_torch = False
+        self.coins = 0 
         pg.mixer.music.rewind()
         self.loaded_functions = self.load_functions_from_module(
             "puzzles_functions", self.get_top_level_functions("puzzles_functions.py")
@@ -229,18 +191,26 @@ class Game:
         Wall(self, (0, 9), (1, 9), WHITE, "horizontal", (8, 8))
         Wall(self, (2, 9), (9, 9), WHITE, "horizontal", (8, 8))
 
-        Wall(self, (3, 1), (4, 1), PINK, "horizontal", (0, 1), type="interactive", id=0) # portal 
+        Wall(
+            self, (3, 1), (4, 1), PINK, "horizontal", (0, 1), type="interactive", id=0
+        )  # portal
         Wall(self, (1, 3), (2, 3), PINK, "horizontal", (2, 3), type="interactive", id=1)
         Wall(self, (6, 3), (7, 3), PINK, "horizontal", (2, 3), type="interactive", id=2)
         Wall(self, (3, 4), (4, 4), PINK, "horizontal", (3, 4), type="interactive", id=3)
         Wall(self, (2, 8), (3, 8), PINK, "horizontal", (7, 8), type="interactive", id=4)
 
         Wall(self, (5, 3), (5, 4), PINK, "vertical", (4, 5), type="interactive", id=5)
-        Wall(self, (4, 5), (4, 6), PINK, "vertical", (3, 4), type="interactive", id=6)
+        # Wall(self, (4, 5), (4, 6), PINK, "vertical", (3, 4), type="interactive", id=6)
         Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=7)
         Fog(self, 5, 4, os.path.join("assets/fog"))
         self.player = Player(self, 0, 4)
         self.player.total_number_of_moves = 0
+        
+        Coin(self,0,3)
+        Coin(self,3,2)
+        Coin(self,1,8)
+        Shopkeeper(self,8,0)
+        
 
         self.tiles = pg.sprite.Group()
         for x in range(9):
@@ -250,7 +220,7 @@ class Game:
         Portal(self, 3, 0, TILESIZE // 2, TILESIZE // 2, 1)
         Portal(self, 6, 5, TILESIZE // 2, TILESIZE // 2, 2)
 
-    def play_puzzle(self, sprite:Wall):
+    def play_puzzle(self, sprite: Wall):
         self.pause_game()
         sprite.id
         if not self.loaded_functions:
@@ -258,7 +228,7 @@ class Game:
             self.unpause_game()
             self.solved_puzzles += 1
             return
-        if sprite.id >=  len(self.loaded_functions):
+        if sprite.id >= len(self.loaded_functions):
             sprite.kill()
             self.unpause_game()
             self.solved_puzzles += 1
@@ -271,12 +241,11 @@ class Game:
                 self.handel_score(60)
                 self.play_sound("solve")
                 self.solved_puzzles += 1
-            else: 
+            else:
                 self.unpause_game()
                 self.handel_score(-10)
                 self.play_sound("fail")
-                
-            
+
         # random_puzzle = random.choice(self.loaded_functions)
         # if random_puzzle():
         #     sprite.kill()
@@ -323,17 +292,6 @@ class Game:
 
         self.new()
 
-    def draw_grid(self):
-        for x in range(0, WIDTH, TILESIZE):
-            pg.draw.line(self.screen, WHITE, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILESIZE):
-            pg.draw.line(self.screen, WHITE, (0, y), (WIDTH, y))
-
-    def draw_player(self):
-        player_image_copy = self.player.image.copy()
-        player_image_copy = pg.transform.scale(player_image_copy, (150, 150))
-        self.screen.blit(player_image_copy, ((TILESIZE * 9) + 35, (TILESIZE * 3)))
-
     def handel_score(self, score_change):
         self.bonus_score = max(((self.score + score_change) - 2000), 0)
         self.score = min(2000, self.score + score_change)
@@ -352,32 +310,21 @@ class Game:
                 self.solve_puzzle_sound.play()
             elif sound_to_play == "fail":
                 self.fail_puzzle_sound.play()
+            elif sound_to_play == "coin":
+                self.coin_sound.play()
 
     def draw(self):
         self.screen.fill(BGCOLOR)
-        # self.draw_grid()
         self.tiles.draw(self.screen)
         self.walls.draw(self.screen)
         self.interactive_walls.draw(self.screen)
         self.teleporter.draw(self.screen)
         self.player_sprite.draw(self.screen)
         self.fog_sprite.draw(self.screen)
-        self.exit_button.draw(self.screen)
-        self.reset_button.draw(self.screen)
-        self.volume_button.draw(self.screen)
-        self.music_button.draw(self.screen)
-        self.draw_player()
-        self.draw_text(
-            f"Score: {self.score} + {self.bonus_score}",
-            ((TILESIZE * 11) + 27, (TILESIZE * 1) + 30),
-            pg.font.Font(VOLKSWAGEN_BOLD_FONT_PATH, 20),
-        )
-        self.draw_text(
-            f"Solved Puzzles: {self.solved_puzzles}/8",
-            ((TILESIZE * 12) - 10, (TILESIZE * 2) - 10),
-            pg.font.Font(VOLKSWAGEN_BOLD_FONT_PATH, 20),
-        )
-        self.screen.blit(self.logo_image, ((TILESIZE * 8) + 35, -50))
+        self.coin_sprite.draw(self.screen)
+        self.shopkeeper.draw(self.screen)
+        draw_side_ui(self)
+        
 
         pg.display.flip()
 
@@ -396,19 +343,22 @@ class Game:
         self.end_exit_button.draw(self.screen)
         self.end_reset_button.draw(self.screen)
         self.screen.blit(self.end_logo_image, ((TILESIZE * 2) - 30, -100))
-        self.draw_text(
+        draw_text(
+            self,
             f"congrats your score is ",
             ((TILESIZE * 8) - 35, TILESIZE * 3),
             pg.font.Font(VOLKSWAGEN_BOLD_FONT_PATH, 20),
         )
 
-        self.draw_text(
+        draw_text(
+            self,
             f"{self.score + self.bonus_score}",
             ((TILESIZE * 7) - 10, TILESIZE * 4 - 30),
             pg.font.Font(VOLKSWAGEN_BOLD_FONT_PATH, 50),
         )
 
-        self.draw_text(
+        draw_text(
+            self,
             f"{self.grade()}",
             ((TILESIZE * 6) + 40, TILESIZE * 5 - 30),
             pg.font.Font(VOLKSWAGEN_BOLD_FONT_PATH, 120),
