@@ -28,6 +28,11 @@ def dragons():
     app.run()
     return app.get_state("solved")
 
+def cannibal():
+    app = App("cannibal.home")
+    app.set_state("solved", False)
+    app.run()
+    return app.get_state("solved")
 
 def matchstick():
     app = App("matchstick.home")
