@@ -39,6 +39,9 @@ SOULVE_PUZZLE_SOUND = "assets/sounds/maze/solving_puzzle.wav"
 FAIL_PUZZLE_SOUND = "assets/sounds/maze/failing_puzzle.wav"
 ERROR_SOUND = "assets/sounds/maze/error.mp3"
 COIN_SOUND = "assets/sounds/maze/coin_sound.mp3"
+HIT_SOUND = "assets/sounds/battleship/hit.mp3"
+MINE_SOUND = "assets/sounds/battleship/mine.mp3"
+MISS_SOUND = "assets/sounds/battleship/miss.mp3"
 
 MAZE_MUSIC = "assets/music/background_music.mp3"
 

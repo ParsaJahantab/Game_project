@@ -1,0 +1,10 @@
+{
+    "door0": {
+        "riddle": "What is it that the more you subtract from it, the more it grows?",
+        "answer": "portal"
+    },
+    "door1": {
+        "riddle": "riddle related to door1",
+        "answer": "1"
+    }
+}

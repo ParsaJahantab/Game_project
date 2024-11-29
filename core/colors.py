@@ -1,0 +1,10 @@
+class Colors:
+    btn_color = '#7367F0'
+    success_color = '#28C76F'
+    success_color_purple = '#723694'
+    error_color = '#FF4C51'
+    error_color_pink = '#bc319e'
+    white_color = '#fff'
+    mauve_color = '#e8b1ec'
+    pale_violet_color = '#ba9efb'
+    dark_blue = '#031932'

@@ -65,6 +65,7 @@ class Game:
             if func.__name__ == "battleship":
                 return lambda *args, **kwargs: func(self, *args, **kwargs)
             return func
+        
 
         return [wrap_function(getattr(module, func)) for func in function_names]
 
@@ -231,36 +232,36 @@ class Game:
             self.unpause_game()
             self.solved_puzzles += 1
             return
-        if sprite.id >= len(self.loaded_functions):
-            sprite.kill()
-            self.unpause_game()
-            self.solved_puzzles += 1
-            return
-        else:
-            puzzle = self.loaded_functions[sprite.id]
-            if puzzle():
-                sprite.kill()
-                self.unpause_game()
-                self.handel_score(60)
-                self.play_sound("solve")
-                self.solved_puzzles += 1
-            else:
-                self.unpause_game()
-                self.handel_score(-10)
-                self.play_sound("fail")
-
-        # random_puzzle = random.choice(self.loaded_functions)
-        # if random_puzzle():
+        # if sprite.id >= len(self.loaded_functions):
         #     sprite.kill()
-        #     self.loaded_functions.remove(random_puzzle)
         #     self.unpause_game()
-        #     self.handel_score(60)
-        #     self.play_sound("solve")
         #     self.solved_puzzles += 1
+        #     return
         # else:
-        #     self.unpause_game()
-        #     self.handel_score(-10)
-        #     self.play_sound("fail")
+        #     puzzle = self.loaded_functions[sprite.id]
+        #     if puzzle():
+        #         sprite.kill()
+        #         self.unpause_game()
+        #         self.handel_score(60)
+        #         self.play_sound("solve")
+        #         self.solved_puzzles += 1
+        #     else:
+        #         self.unpause_game()
+        #         self.handel_score(-10)
+        #         self.play_sound("fail")
+
+        random_puzzle = random.choice(self.loaded_functions)
+        if random_puzzle():
+            sprite.kill()
+            self.loaded_functions.remove(random_puzzle)
+            self.unpause_game()
+            self.handel_score(60)
+            self.play_sound("solve")
+            self.solved_puzzles += 1
+        else:
+            self.unpause_game()
+            self.handel_score(-10)
+            self.play_sound("fail")
 
     def pause_game(self):
         self.is_pause = True
