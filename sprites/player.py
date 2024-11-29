@@ -4,6 +4,7 @@ from sprites.wall import *
 from sprites.interactive_tile import *
 from sprites.teleporter import *
 from sprites.fog import *
+from ui.utils.utils_functions import *
 
 
 class Player(pg.sprite.Sprite):
@@ -66,6 +67,11 @@ class Player(pg.sprite.Sprite):
         self.total_number_of_moves = 0
         self.moves_in_the_fog_in_one_go = 0
         self.enter_fog_pos = ()
+        
+        self.overlay_image = None
+        self.overlay_start_time = None
+        self.overlay_duration = 3000  
+        self.display_text = ""
 
     def load_image(self, paths):
         images = []
@@ -231,6 +237,8 @@ class Player(pg.sprite.Sprite):
                 elif self.gonna_clollide_with_fog and (
                     self.fog.number_of_times_fog_visited > 2 or not self.game.has_torch
                 ):
+                    if not self.game.has_torch:
+                        self.display_overlay("I need a torch")
                     return False
                 elif not self.gonna_clollide_with_fog and self.is_player_in_fog:
                     self.moves_in_the_fog_in_one_go = 0
@@ -279,6 +287,19 @@ class Player(pg.sprite.Sprite):
                         return (True, wall)
         return (False, None)
 
+    def display_overlay(self, text):
+            self.overlay_image = pg.Surface((150, 50), pg.SRCALPHA)  
+            self.overlay_image.fill((0, 0, 0, 0))  
+            self.display_text = text
+
+
+            font = pg.font.Font(None, 16)  
+            text_surface = font.render(text, True, WHITE)  
+            text_rect = text_surface.get_rect(center=(50, 25))
+            self.overlay_image.blit(text_surface, text_rect)
+
+            self.overlay_start_time = pg.time.get_ticks()
+
     def change_animation(self):
         now = pg.time.get_ticks()
         if now - self.last_update > self.frame_rate:
@@ -312,3 +333,28 @@ class Player(pg.sprite.Sprite):
             self.rect.y = target_center_y
 
         self.hit_rect.center = self.rect.center
+        
+        if self.overlay_image and self.overlay_start_time:
+            current_time = pg.time.get_ticks()
+            if current_time - self.overlay_start_time > self.overlay_duration:
+                self.overlay_image = None  
+                self.display_text = ""
+            
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+            
+    def draw_text(self, screen):
+        if self.overlay_image:
+            # if self.display_text == "I need a torch":
+            #     self.display_text = f"I need a torch\nI can get it from shopkeeper"
+            overlay_rect = self.overlay_image.get_rect(midbottom=self.rect.midtop)
+            screen.blit(self.overlay_image, overlay_rect)
+            draw_text(
+            self.game,
+            f"{self.display_text}",
+            ((TILESIZE * 12) - 40, TILESIZE * 5+15),
+            pg.font.Font(VOLKSWAGEN_BOLD_FONT_PATH, 10),
+        )
+            

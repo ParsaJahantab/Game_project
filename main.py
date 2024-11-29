@@ -115,7 +115,10 @@ class Game:
         if self.coins ==3 :
             self.has_torch = True
             self.coins = 0
+            self.play_sound("solve")
             print(self.has_torch)
+        else :
+            self.player.display_overlay(" I need 3 coins for torch")
         
 
     def new(self):
@@ -319,8 +322,9 @@ class Game:
         self.walls.draw(self.screen)
         self.interactive_walls.draw(self.screen)
         self.teleporter.draw(self.screen)
-        self.player_sprite.draw(self.screen)
+        self.player.draw(self.screen)
         self.fog_sprite.draw(self.screen)
+        self.player.draw_text(self.screen)
         self.coin_sprite.draw(self.screen)
         self.shopkeeper.draw(self.screen)
         draw_side_ui(self)
