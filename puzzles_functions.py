@@ -38,6 +38,5 @@ def matchstick():
 def chest(key,player):
     if not key:
         player.display_overlay("I need a key")
-        return key
-    else :
-        pass
+    
+    return key
