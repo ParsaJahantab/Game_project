@@ -8,7 +8,8 @@ from sprites.player import *
 from sprites.teleporter import *
 from sprites.fog import *
 from ui.button import *
-import random
+
+# import random
 import importlib
 import ast
 from ui.utils.utils_functions import *
@@ -32,6 +33,9 @@ class Game:
         self.fail_puzzle_sound = pg.mixer.Sound(FAIL_PUZZLE_SOUND)
         self.error_sound = pg.mixer.Sound(ERROR_SOUND)
         self.coin_sound = pg.mixer.Sound(COIN_SOUND)
+        self.miss_sound = pg.mixer.Sound(MISS_SOUND)
+        self.hit_sound = pg.mixer.Sound(HIT_SOUND)
+        self.mine_sound = pg.mixer.Sound(MINE_SOUND)
         pg.mixer.music.load(MAZE_MUSIC)
         pg.mixer.music.set_volume(0.5)
         pg.mixer.music.play(-1)
@@ -57,7 +61,6 @@ class Game:
         )
         self.is_pause = False
 
-
     def load_functions_from_module(self, module_name, function_names):
         module = importlib.import_module(module_name)
 
@@ -65,10 +68,18 @@ class Game:
             if func.__name__ == "battleship":
                 return lambda *args, **kwargs: func(self, *args, **kwargs)
             return func
-        
+
+        if "door" in function_names:
+            function_names.remove("door")
+            function_names.insert(0, "door")
 
         return [wrap_function(getattr(module, func)) for func in function_names]
 
+    def load_music(self, music=MAZE_MUSIC):
+        if not self.is_music_mute:
+            pg.mixer.music.load(music)
+            pg.mixer.music.set_volume(0.5)
+            pg.mixer.music.play(-1)
 
     def get_top_level_functions(self, file_path):
 
@@ -106,21 +117,20 @@ class Game:
         self.handel_score(2000 + bonus)
         self.play_sound("win")
         self.playing = False
-        
-    def add_coin(self,sprite):
-        self.coins +=1
+
+    def add_coin(self, sprite):
+        self.coins += 1
         self.play_sound("coin")
         sprite.kill()
-    
+
     def check_coin(self):
-        if self.coins ==3 :
+        if self.coins == 3:
             self.has_torch = True
             self.coins = 0
             self.play_sound("solve")
             print(self.has_torch)
-        else :
+        else:
             self.player.display_overlay(" I need 3 coins for torch")
-        
 
     def new(self):
         self.all_sprites = pg.sprite.Group()
@@ -139,7 +149,7 @@ class Game:
         self.playing = True
         self.is_pause = False
         self.has_torch = False
-        self.coins = 0 
+        self.coins = 0
         pg.mixer.music.rewind()
         self.loaded_functions = self.load_functions_from_module(
             "puzzles_functions", self.get_top_level_functions("puzzles_functions.py")
@@ -205,16 +215,15 @@ class Game:
 
         Wall(self, (5, 3), (5, 4), PINK, "vertical", (4, 5), type="interactive", id=5)
         # Wall(self, (4, 5), (4, 6), PINK, "vertical", (3, 4), type="interactive", id=6)
-        Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=7)
+        Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=6)
         Fog(self, 5, 4, os.path.join("assets/fog"))
         self.player = Player(self, 0, 4)
         self.player.total_number_of_moves = 0
-        
-        Coin(self,0,3)
-        Coin(self,3,2)
-        Coin(self,1,8)
-        Shopkeeper(self,8,0)
-        
+
+        Coin(self, 0, 3)
+        Coin(self, 3, 2)
+        Coin(self, 1, 8)
+        Shopkeeper(self, 8, 0)
 
         self.tiles = pg.sprite.Group()
         for x in range(9):
@@ -232,36 +241,38 @@ class Game:
             self.unpause_game()
             self.solved_puzzles += 1
             return
-        # if sprite.id >= len(self.loaded_functions):
-        #     sprite.kill()
-        #     self.unpause_game()
-        #     self.solved_puzzles += 1
-        #     return
-        # else:
-        #     puzzle = self.loaded_functions[sprite.id]
-        #     if puzzle():
-        #         sprite.kill()
-        #         self.unpause_game()
-        #         self.handel_score(60)
-        #         self.play_sound("solve")
-        #         self.solved_puzzles += 1
-        #     else:
-        #         self.unpause_game()
-        #         self.handel_score(-10)
-        #         self.play_sound("fail")
-
-        random_puzzle = random.choice(self.loaded_functions)
-        if random_puzzle():
+        if sprite.id >= len(self.loaded_functions):
             sprite.kill()
-            self.loaded_functions.remove(random_puzzle)
             self.unpause_game()
-            self.handel_score(60)
-            self.play_sound("solve")
             self.solved_puzzles += 1
+            return
         else:
-            self.unpause_game()
-            self.handel_score(-10)
-            self.play_sound("fail")
+            puzzle = self.loaded_functions[sprite.id]
+            if puzzle():
+                sprite.kill()
+                self.unpause_game()
+                self.handel_score(60)
+                self.play_sound("solve")
+                self.solved_puzzles += 1
+                self.load_music()
+            else:
+                self.unpause_game()
+                self.handel_score(-10)
+                self.play_sound("fail")
+                self.load_music()
+
+        # random_puzzle = random.choice(self.loaded_functions)
+        # if random_puzzle():
+        #     sprite.kill()
+        #     self.loaded_functions.remove(random_puzzle)
+        #     self.unpause_game()
+        #     self.handel_score(60)
+        #     self.play_sound("solve")
+        #     self.solved_puzzles += 1
+        # else:
+        #     self.unpause_game()
+        #     self.handel_score(-10)
+        #     self.play_sound("fail")
 
     def pause_game(self):
         self.is_pause = True
@@ -269,6 +280,14 @@ class Game:
 
     def unpause_game(self):
         self.is_pause = False
+        if self.is_mute:
+            self.volume_button.icon = self.volume_button.secondary_icon
+            self.volume_button.image = self.volume_button.secondary_image
+            self.volume_button.is_active = False
+        if self.is_music_mute:
+            self.music_button.icon = self.music_button.secondary_icon
+            self.music_button.image = self.music_button.secondary_image
+            self.music_button.is_active = False
         if not self.is_music_mute:
             pg.mixer.music.unpause()
 
@@ -279,6 +298,7 @@ class Game:
                 self.events()
                 self.update()
                 self.draw()
+
         while not self.playing:
             self.draw_end()
             self.events()
@@ -316,6 +336,12 @@ class Game:
                 self.fail_puzzle_sound.play()
             elif sound_to_play == "coin":
                 self.coin_sound.play()
+            elif sound_to_play == "miss":
+                self.miss_sound.play()
+            elif sound_to_play == "hit":
+                self.hit_sound.play()
+            elif sound_to_play == "mine":
+                self.mine_sound.play()
 
     def draw(self):
         self.screen.fill(BGCOLOR)
@@ -329,7 +355,6 @@ class Game:
         self.coin_sprite.draw(self.screen)
         self.shopkeeper.draw(self.screen)
         draw_side_ui(self)
-        
 
         pg.display.flip()
 

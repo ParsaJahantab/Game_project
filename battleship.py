@@ -26,7 +26,15 @@ class BattleshipGame:
         # self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.exit_button = get_exit_button()
         self.volume_button = get_volume_button(type="puzzle")
+        if game.is_mute :
+            self.volume_button.icon = self.volume_button.secondary_icon
+            self.volume_button.image = self.volume_button.secondary_image
+            self.volume_button.is_active = False
         self.music_button = get_music_button(type="puzzle")
+        if game.is_music_mute :
+            self.music_button.icon = self.music_button.secondary_icon
+            self.music_button.image = self.music_button.secondary_image
+            self.music_button.is_active = False
         self.end_exit_button = get_exit_button(type="end", maze=False)
 
         self.screen = game.screen
@@ -36,6 +44,7 @@ class BattleshipGame:
         self.load_images()
         self.place_ships()
         self.place_mines()
+        self.game.load_music(BATTLESHIP_MUSIC)
 
     def load_images(self):
         self.ship_image = pygame.transform.scale(
@@ -169,12 +178,15 @@ class BattleshipGame:
             if self.grid[row][col] == 2:
                 self.shots_left += 1
                 self.grid[row][col] = 1
+                self.game.play_sound("hit")
             elif self.grid[row][col] == 3:
                 self.mine_hits[(row, col)] = True
                 if len(self.mine_hits) == 4:
                     self.shots_left -= 3
+                self.game.play_sound("mine")
             else:
                 self.grid[row][col] = -1
+                self.game.play_sound("miss")
             self.shots_left -= 1
 
     def run(self):
@@ -189,6 +201,14 @@ class BattleshipGame:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.handle_click(*pygame.mouse.get_pos())
+                if self.volume_button.is_clicked(event):
+                    self.game.is_mute = not self.game.is_mute
+                if self.music_button.is_clicked(event):
+                    if self.game.is_music_mute:
+                        pg.mixer.music.unpause()
+                    else:
+                        pg.mixer.music.pause()
+                    self.game.is_music_mute = not self.game.is_music_mute
 
             time_left = self.display_stats()
             self.time_left = time_left

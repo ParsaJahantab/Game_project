@@ -40,7 +40,7 @@ def draw_side_ui(game, type="maze", puzzle=None):
         )
         draw_text(
             game,
-            f"YELLOW : ship tiles",
+            f"GRAY : ship tiles",
             ((TILESIZE * 12) - 40, (TILESIZE * 4) - 70),
             pg.font.Font(VOLKSWAGEN_BOLD_FONT_PATH, 15),
         )

@@ -44,6 +44,7 @@ MINE_SOUND = "assets/sounds/battleship/mine.mp3"
 MISS_SOUND = "assets/sounds/battleship/miss.mp3"
 
 MAZE_MUSIC = "assets/music/background_music.mp3"
+BATTLESHIP_MUSIC = "assets/music/battleship.mp3"
 
 RED_BUTTON = "assets/images/buttons/red_button_image.png"
 BLUE_BUTTON = "assets/images/buttons/blue_button_image.png"
@@ -54,6 +55,8 @@ MUSIC_ICON = "assets/images/icons/music.png"
 MUTE_ICON = "assets/images/icons/mute.png"
 SLASH_ICON = "assets/images/icons/slash.png"
 VOLUME_ICON = "assets/images/icons/volume.png"
+
+CURSOR = "assets/images/cursor/cursor.png"
 
 LOGO = "assets/images/logo/logo.png"
 

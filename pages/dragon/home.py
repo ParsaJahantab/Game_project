@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-#from pygame import mixer
+from pygame import mixer
 # from .dragons_logic import DragonsLogic
 
 
@@ -10,8 +10,7 @@ class DragonHomePage:
         self.voice_path = 'assets/voices/dragon voice.mp3'
         self.main_img_path = 'assets/images/3headDragon.png'
 
-        # mixer.init()
-        # mixer.music.load('assets/voices/dragon voice.mp3')
+        mixer.music.load('assets/voices/dragon voice.mp3')
 
         self.riddles = {}
         self.is_pressed = True
@@ -32,7 +31,7 @@ class DragonHomePage:
         )
         self.challenge_btn_color = '#fefd89'
 
-    def frame(self, app, frame: tk.Frame):
+    def frame(self, app, frame: tk.Frame):        
         frame.grid()
         frame.pack()
         app.update_title('King Ghidorah\'s Riddle')
@@ -96,14 +95,14 @@ class DragonHomePage:
 
     def play_voice(self):
         try:
-            #mixer.music.play()
+            mixer.music.play()
             self.is_playing = True
         except Exception as e:
             print(f'Error playing music: {e}')
 
     def pause_voice(self):
         try:
-            #mixer.music.pause()
+            mixer.music.pause()
             self.is_playing = False
         except Exception as e:
             print(f'Error pausing music: {e}')
