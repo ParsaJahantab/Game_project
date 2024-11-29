@@ -8,13 +8,15 @@ from sprites.player import *
 from sprites.teleporter import *
 from sprites.fog import *
 from ui.button import *
+import tkinter as tk
+from PIL import Image, ImageTk
 
 # import random
 import importlib
 import ast
 from ui.utils.utils_functions import *
 from ui.side_ui import *
-from sprites.coin import *
+from sprites.Item import *
 from sprites.shopkeeper import *
 
 
@@ -67,6 +69,8 @@ class Game:
         def wrap_function(func):
             if func.__name__ == "battleship":
                 return lambda *args, **kwargs: func(self, *args, **kwargs)
+            if func.__name__ == "chest":
+                return lambda *args, **kwargs: func(self.has_key, *args, **kwargs)
             return func
 
         if "door" in function_names:
@@ -119,8 +123,12 @@ class Game:
         self.play_sound("win")
         self.playing = False
 
-    def add_coin(self, sprite):
-        self.coins += 1
+    def add_item(self, sprite):
+        if sprite.type == 'coin':
+            self.coins += 1
+        else:
+            self.has_key = True
+        
         self.play_sound("coin")
         sprite.kill()
 
@@ -129,7 +137,6 @@ class Game:
             self.has_torch = True
             self.coins = 0
             self.play_sound("solve")
-            print(self.has_torch)
         else:
             self.player.display_overlay(" I need 3 coins for torch")
 
@@ -144,11 +151,13 @@ class Game:
         self.player_sprite = pg.sprite.Group()
         self.coin_sprite = pg.sprite.Group()
         self.shopkeeper = pg.sprite.Group()
+        self.items = pg.sprite.Group()
         self.score = 2000
         self.bonus_score = 0
         self.solved_puzzles = 0
         self.playing = True
         self.is_pause = False
+        self.has_key = False
         self.has_torch = False
         self.coins = 0
         pg.mixer.music.rewind()
@@ -215,15 +224,16 @@ class Game:
         Wall(self, (2, 8), (3, 8), PINK, "horizontal", (7, 8), type="interactive", id=4)
 
         Wall(self, (5, 3), (5, 4), PINK, "vertical", (4, 5), type="interactive", id=5)
-        # Wall(self, (4, 5), (4, 6), PINK, "vertical", (3, 4), type="interactive", id=6)
-        Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=6)
+        Wall(self, (4, 5), (4, 6), PINK, "vertical", (3, 4), type="interactive", id=6)
+        #Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=6)
         Fog(self, 5, 4, os.path.join("assets/fog"))
         self.player = Player(self, 0, 4)
         self.player.total_number_of_moves = 0
 
-        Coin(self, 0, 3)
-        Coin(self, 3, 2)
-        Coin(self, 1, 8)
+        Item(self, 0, 3,COIN,"coin")
+        Item(self, 3, 2,COIN,"coin")
+        Item(self, 1, 8,COIN,"coin")
+        Item(self, 8, 5,KEY,"key")
         Shopkeeper(self, 8, 0)
 
         self.tiles = pg.sprite.Group()
@@ -353,7 +363,7 @@ class Game:
         self.player.draw(self.screen)
         self.fog_sprite.draw(self.screen)
         self.player.draw_text(self.screen)
-        self.coin_sprite.draw(self.screen)
+        self.items.draw(self.screen)
         self.shopkeeper.draw(self.screen)
         draw_side_ui(self)
 

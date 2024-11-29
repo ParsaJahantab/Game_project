@@ -139,7 +139,7 @@ class Player(pg.sprite.Sprite):
                 self.change_heading(heading)
                 self.game.play_sound("walk")
                 self.total_number_of_moves += 1
-                self.collide_with_coins()
+                self.collide_with_items()
                 self.collide_with_shopkeeper()
             elif self.x == 6 and self.y == 0 and dy == -1:
                 if self.check_for_teleport((1, 8)):
@@ -206,10 +206,11 @@ class Player(pg.sprite.Sprite):
                 return True
         return False
 
-    def collide_with_coins(self):
-        for coin in self.game.coin_sprite:
-            if self.hit_rect.colliderect(coin.rect):
-                self.game.add_coin(coin)
+    def collide_with_items(self):
+        for item in self.game.items:
+            if self.hit_rect.colliderect(item.rect):
+                self.game.add_item(item)
+
                 
     def collide_with_shopkeeper(self):
         shopkeeper = self.game.shopkeeper.sprites()[0]

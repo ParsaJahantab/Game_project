@@ -2,13 +2,13 @@ import pygame as pg
 import os
 from settings import *
 
-class Coin(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.coin_sprite
+class Item(pg.sprite.Sprite):
+    def __init__(self, game, x, y,path,type):
+        self.groups = game.all_sprites, game.items
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-
-        self.original_image = pg.image.load(COIN).convert_alpha()
+        self.type = type
+        self.original_image = pg.image.load(path).convert_alpha()
         self.original_image = pg.transform.scale(self.original_image, (60, 60))
         self.image = self.original_image.copy()
         self.rect = self.image.get_rect()

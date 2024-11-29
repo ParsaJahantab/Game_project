@@ -1,4 +1,4 @@
-from puzzles.hats.hats_render import *
+
 from battleship import *
 from core.app import App
 
@@ -34,3 +34,6 @@ def matchstick():
     app.set_state("solved", False)
     app.run()
     return app.get_state("solved")
+
+def chest(key):
+    return key

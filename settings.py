@@ -62,6 +62,7 @@ LOGO = "assets/images/logo/logo.png"
 
 PORTAL = "assets/images/items/portal.png"
 COIN = "assets/images/items/coin.png"
+KEY = "assets/images/items/key.png"
 SHOPKEEPER = "assets/images/shopkeeper/shopkeeper.png"
 
 GRASS_TILE = "assets/images/ground/grass.png"
