@@ -13,3 +13,5 @@ class Portal(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x * TILESIZE + (TILESIZE - width) // 2
         self.rect.y = y * TILESIZE + (TILESIZE - height) // 2
+
+

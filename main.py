@@ -164,9 +164,6 @@ class Game:
         self.loaded_functions = self.load_functions_from_module(
             "puzzles_functions", self.get_top_level_functions("puzzles_functions.py")
         )
-        for x in range(9):
-            for y in range(9):
-                InteractiveTile(self, x, y, TILESIZE, TILESIZE, GREEN)
 
         Wall(self, (0, 0), (0, 4), WHITE, "vertical", (-1, 0))
         Wall(self, (0, 5), (0, 9), WHITE, "vertical", (-1, 0))
@@ -225,7 +222,7 @@ class Game:
 
         Wall(self, (5, 3), (5, 4), PINK, "vertical", (4, 5), type="interactive", id=5)
         Wall(self, (4, 5), (4, 6), PINK, "vertical", (3, 4), type="interactive", id=6)
-        #Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=6)
+        Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=6)
         Fog(self, 5, 4, os.path.join("assets/fog"))
         self.player = Player(self, 0, 4)
         self.player.total_number_of_moves = 0
@@ -239,14 +236,13 @@ class Game:
         self.tiles = pg.sprite.Group()
         for x in range(9):
             for y in range(9):
-                InteractiveTile(self, x, y, TILESIZE, TILESIZE, GREEN)
+                InteractiveTile(self, x, y, TILESIZE, TILESIZE)
 
         Portal(self, 3, 0, TILESIZE // 2, TILESIZE // 2, 1)
         Portal(self, 6, 5, TILESIZE // 2, TILESIZE // 2, 2)
 
     def play_puzzle(self, sprite: Wall):
         self.pause_game()
-        sprite.id
         if not self.loaded_functions:
             sprite.kill()
             self.unpause_game()
@@ -261,16 +257,14 @@ class Game:
             puzzle = self.loaded_functions[sprite.id]
             if puzzle():
                 sprite.kill()
-                self.unpause_game()
                 self.handel_score(60)
                 self.play_sound("solve")
                 self.solved_puzzles += 1
-                self.load_music()
             else:
-                self.unpause_game()
                 self.handel_score(-10)
                 self.play_sound("fail")
-                self.load_music()
+            self.unpause_game()
+            self.load_music()
 
         # random_puzzle = random.choice(self.loaded_functions)
         # if random_puzzle():

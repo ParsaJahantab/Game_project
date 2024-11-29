@@ -3,7 +3,7 @@ from settings import *
 
 
 class InteractiveTile(pg.sprite.Sprite):
-    def __init__(self, game, x, y, width, height, color):
+    def __init__(self, game, x, y, width, height):
         self.groups = game.all_sprites, game.tiles
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -13,12 +13,10 @@ class InteractiveTile(pg.sprite.Sprite):
         self.yellow_tile_image = self.load_image(DIRT_TILE, width, height)
         self.red_tile_image = self.load_image(ROCK_TILE, width, height)
         self.image = self.green_tile_image
-        # self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.x = x * width
         self.rect.y = y * height
         self.number_of_time_visited = 0
-        self.id = id
 
     def load_image(self, path, width, height):
         image = pg.image.load(path).convert_alpha()
@@ -31,3 +29,5 @@ class InteractiveTile(pg.sprite.Sprite):
             self.image = self.yellow_tile_image
         elif self.number_of_time_visited == 3:
             self.image = self.red_tile_image
+
+
