@@ -70,7 +70,7 @@ class Game:
             if func.__name__ == "battleship":
                 return lambda *args, **kwargs: func(self, *args, **kwargs)
             if func.__name__ == "chest":
-                return lambda *args, **kwargs: func(self.has_key, *args, **kwargs)
+                return lambda *args, **kwargs: func(self.has_key, self.player, *args, **kwargs)
             return func
 
         if "door" in function_names:

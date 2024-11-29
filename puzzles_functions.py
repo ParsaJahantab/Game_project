@@ -35,5 +35,9 @@ def matchstick():
     app.run()
     return app.get_state("solved")
 
-def chest(key):
-    return key
+def chest(key,player):
+    if not key:
+        player.display_overlay("I need a key")
+        return key
+    else :
+        pass
