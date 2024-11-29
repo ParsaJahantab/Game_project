@@ -222,7 +222,7 @@ class Game:
 
         Wall(self, (5, 3), (5, 4), PINK, "vertical", (4, 5), type="interactive", id=5)
         Wall(self, (4, 5), (4, 6), PINK, "vertical", (3, 4), type="interactive", id=6)
-        Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=6)
+        # Wall(self, (2, 8), (2, 9), PINK, "vertical", (1, 2), type="interactive", id=6)
         Fog(self, 5, 4, os.path.join("assets/fog"))
         self.player = Player(self, 0, 4)
         self.player.total_number_of_moves = 0
