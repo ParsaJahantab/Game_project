@@ -76,10 +76,11 @@ class Game:
         return [wrap_function(getattr(module, func)) for func in function_names]
 
     def load_music(self, music=MAZE_MUSIC):
-        if not self.is_music_mute:
-            pg.mixer.music.load(music)
-            pg.mixer.music.set_volume(0.5)
-            pg.mixer.music.play(-1)
+        pg.mixer.music.load(music)
+        pg.mixer.music.set_volume(0.5)
+        pg.mixer.music.play(-1)
+        if  self.is_music_mute:
+            pg.mixer.music.pause()
 
     def get_top_level_functions(self, file_path):
 
